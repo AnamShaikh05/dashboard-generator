@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automated Dashboard Generator</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Lora:wght@400;500&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1 style="font-size: 30px;">Dashboard Generator</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('index') }}">Home</a></li>
+                    <li><a href="{{ url_for('login') }}">Login</a></li>
+                    <li><a href="{{ url_for('register') }}">Register</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="landing-page">
+            <div class="hero">
+                <h1 style="font-size: 50px;">Create Interactive Dashboards in Minutes</h1>
+                <p>Elevate your data with our intuitive platform, crafting professional visualizations effortlessly.</p>
+                <div class="cta-buttons">
+                    <a href="{{ url_for('login') }}" class="btn primary">Get Started</a>
+                    <a href="#features" class="btn secondary">Learn More</a>
+                </div>
+            </div>
+
+            <section id="about" class="about">
+                <div class="about-content">
+                    <div class="about-text">
+                        <h2>Transform Data into Artful Insights</h2>
+                        <p>Dashboard Generator redefines data visualization with elegance. Upload Excel or CSV files, customize with our seamless interface, and share sophisticated dashboards. Perfect for analytics, tracking, or reporting, our tool makes complexity simple.</p>
+                        <ul class="about-features">
+                            <li>Intuitive drag-and-drop chart creation</li>
+                            <li>Real-time data synchronization</li>
+                            <li>Elegant, customizable themes</li>
+                        </ul>
+                        <a href="{{ url_for('register') }}" class="btn primary">Try It Now</a>
+                    </div>
+                    <div class="about-image">
+                        <img src="/static/images/dashboard.avif" alt="Dashboard Preview" class="dashboard-img">
+                    </div>
+                </div>
+            </section>
+
+            <section id="features" class="features">
+                <h2>Key Features</h2>
+                <div class="feature-grid">
+                    <div class="feature-card">
+                        <div class="feature-icon">📊</div>
+                        <h3>Versatile Chart Types</h3>
+                        <p>Explore bar, line, pie charts, and more for tailored visualizations.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">📁</div>
+                        <h3>Excel & CSV Integration</h3>
+                        <p>Seamlessly upload and transform your data files into insights.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🔍</div>
+                        <h3>Advanced Data Filtering</h3>
+                        <p>Refine datasets with precise filters for deeper analysis.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">💾</div>
+                        <h3>Save & Share</h3>
+                        <p>Preserve and distribute dashboards in multiple formats.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🤖</div>
+                        <h3>AI-Powered Insights</h3>
+                        <p>Leverage AI to uncover hidden trends and predictive analytics.</p>
+                    </div>
+                    <div class="feature-card">
+                        <div class="feature-icon">🌐</div>
+                        <h3>Cross-Platform Compatibility</h3>
+                        <p>Access and edit dashboards across devices seamlessly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section class="how-it-works">
+                <h2>How It Works</h2>
+                <div class="steps">
+                    <div class="step">
+                        <div class="step-number">1</div>
+                        <h3>Upload Your Data</h3>
+                        <p>Import Excel or CSV files with ease using our intuitive interface.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">2</div>
+                        <h3>Configure Dashboard</h3>
+                        <p>Customize chart types and styles with a drag-and-drop editor.</p>
+                    </div>
+                    <div class="step">
+                        <div class="step-number">3</div>
+                        <h3>Generate & Save</h3>
+                        <p>Create and store your polished dashboard instantly.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="testimonials" class="testimonials">
+                <h2>What Our Users Say</h2>
+                <div class="testimonial-grid">
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"An elegant solution for visualizing sales data, saving us countless hours."</p>
+                        <div class="testimonial-author">
+                            <img src="/static/images/user1.png" alt="User" class="author-avatar">
+                            <div>
+                                <h4>Sarah Johnson</h4>
+                                <p>Data Analyst</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"Crafting professional dashboards without coding is transformative for our business."</p>
+                        <div class="testimonial-author">
+                            <img src="/static/images/user2.png" alt="User" class="author-avatar">
+                            <div>
+                                <h4>Mike Chen</h4>
+                                <p>Business Owner</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="testimonial-card">
+                        <p class="testimonial-text">"Customizing and sharing dashboards is effortless. A must-have tool!"</p>
+                        <div class="testimonial-author">
+                            <img src="/static/images/user3.png" alt="User" class="author-avatar">
+                            <div>
+                                <h4>Emily Davis</h4>
+                                <p>Project Manager</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="faq" class="faq">
+                <h2>Frequently Asked Questions</h2>
+                <div class="faq-grid">
+                    <div class="faq-item">
+                        <h3 class="faq-question">What file formats are supported?</h3>
+                        <div class="faq-answer">
+                            <p>Dashboard Generator supports a range of file formats for effortless data integration. You can upload CSV (Comma-Separated Values) files, as well as Excel files in .xlsx and .xls formats. This compatibility ensures you can work with data from spreadsheet applications, databases, or data management systems. Our platform automatically parses and prepares your files for visualization, streamlining the process.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-question">Can I share my dashboards?</h3>
+                        <div class="faq-answer">
+                            <p>Yes, sharing is seamless with Dashboard Generator. Export dashboards as high-quality PDFs for reports or presentations, or create secure, shareable links for online access by team members or stakeholders. Role-based access controls allow you to manage permissions, ensuring only authorized users can view or edit. This feature supports collaborative workflows, delivering insights efficiently and securely.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-question">Is my data secure?</h3>
+                        <div class="faq-answer">
+                            <p>Security is paramount. Dashboard Generator uses AES-256 encryption for data at rest and TLS 1.3 for data in transit, adhering to industry standards. We implement rigorous access controls and conduct regular security audits to comply with GDPR and CCPA regulations. Your files and dashboards are stored securely in our cloud, with the option to delete data at any time, ensuring your information remains protected.</p>
+                        </div>
+                    </div>
+                    <div class="faq-item">
+                        <h3 class="faq-question">Do you offer a free trial?</h3>
+                        <div class="faq-answer">
+                            <p>We provide a comprehensive free plan to explore Dashboard Generator’s capabilities at no cost. The Basic plan is free forever, offering core features like creating up to five dashboards, basic chart types, and CSV uploads. For our Pro plan, which includes unlimited dashboards, advanced charts, and priority support, we offer a 14-day money-back guarantee, allowing you to experience its full potential risk-free.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer>
+            <p>© 2025 Dashboard Generator. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+    <script>
+        document.querySelectorAll('.faq-question').forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                const isOpen = answer.style.maxHeight;
+                
+                document.querySelectorAll('.faq-answer').forEach(ans => {
+                    ans.style.maxHeight = null;
+                    ans.parentElement.classList.remove('active');
+                });
+                
+                if (!isOpen) {
+                    answer.style.maxHeight = answer.scrollHeight + 'px';
+                    question.parentElement.classList.add('active');
+                }
+            });
+        });
+    </script>
+</body>
+</html>

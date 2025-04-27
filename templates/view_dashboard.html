@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ dashboard_name }} - Dashboard Generator</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        /* View Dashboard Section Styles */
+        :root {
+            --primary-color: #d4af37; /* Rich gold accent */
+            --primary-dark: #b8972e;
+            --text-color: #1a1a1a; /* Deep charcoal */
+            --text-light: #4a4a4a; /* Soft charcoal */
+            --bg-color: #f5ece4; /* Rich ivory */
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(224, 224, 224, 0.5);
+            --shadow: 0 15px 60px rgba(0, 0, 0, 0.1);
+            --radius: 15px;
+            --transition: all 0.6s ease-in-out;
+            --glass-bg: rgba(245, 236, 228, 0.95);
+            --glass-border: rgba(224, 224, 224, 0.3);
+        }
+
+        .view-dashboard {
+            padding: 6rem 5%;
+            background: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            min-height: calc(100vh - 200px);
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .dashboard-header h2 {
+            color: var(--text-color);
+            text-transform: uppercase;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .dashboard-header h2::after {
+            content: '';
+            position: absolute;
+            bottom: -0.8rem;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .dashboard-actions {
+            display: flex;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-actions .btn {
+            padding: 0.8rem 1.5rem;
+            font-size: 1rem;
+            border-radius: 8px;
+            font-family: 'Lora', serif;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn.secondary {
+            background: var(--card-bg);
+            color: var(--text-color);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn.secondary:hover {
+            transform: translateY(-3px);
+            background: var(--primary-color);
+            color: var(--card-bg);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+        }
+
+        .dashboard-container {
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            display: grid;
+            gap: 1.5rem;
+        }
+
+        .dashboard-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 70px rgba(212, 175, 55, 0.2);
+        }
+
+        /* Grid Layouts for Graphs */
+        .dashboard-container.grid-1x1 {
+            grid-template-columns: 1fr;
+        }
+
+        .dashboard-container.grid-1x2 {
+            grid-template-columns: repeat(2, 1fr);
+        }
+
+        .dashboard-container.grid-2x2 {
+            grid-template-columns: repeat(2, 1fr);
+            grid-template-rows: repeat(2, auto);
+        }
+
+        .dashboard-container.grid-2x3 {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(2, auto);
+        }
+
+        .dashboard-container.grid-3x3 {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(3, auto);
+        }
+
+        .dashboard-container.grid-4x3 {
+            grid-template-columns: repeat(3, 1fr);
+            grid-template-rows: repeat(4, auto);
+        }
+
+        .graph-container {
+            background: var(--card-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 1.5rem;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
+            transition: var(--transition);
+        }
+
+        .graph-container:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 50px rgba(212, 175, 55, 0.2);
+        }
+
+        .graph-container h3 {
+            font-size: 1.3rem;
+            color: var(--text-color);
+            font-family: 'Playfair Display', serif;
+            margin-bottom: 1rem;
+            text-align: center;
+        }
+
+        .plot {
+            width: 100%;
+            min-height: 300px;
+        }
+
+        .plot.number-card {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 200px;
+        }
+
+        .number-value {
+            font-size: 2.5rem;
+            font-family: 'Lora', serif;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .number-label {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            font-family: 'Lora', serif;
+        }
+
+        .loading {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+            text-align: center;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--border-color);
+            border-top: 4px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            font-family: 'Lora', serif;
+        }
+
+        .error-message {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #d32f2f;
+            font-family: 'Lora', serif;
+            padding: 2rem;
+        }
+
+        /* Theme Overrides */
+        .theme-dark {
+            --bg-color: #1e1e1e;
+            --card-bg: rgba(40, 40, 40, 0.9);
+            --glass-bg: rgba(50, 50, 50, 0.95);
+            --text-color: #ffffff;
+            --text-light: #b0b0b0;
+        }
+
+        .theme-blue {
+            --bg-color: #e3f2fd;
+            --primary-color: #1976d2;
+            --primary-dark: #1565c0;
+        }
+
+        .theme-green {
+            --bg-color: #e8f5e9;
+            --primary-color: #2e7d32;
+            --primary-dark: #1b5e20;
+        }
+
+        /* Responsive Styles for View Dashboard */
+        @media (max-width: 1024px) {
+            .dashboard-container {
+                padding: 1.5rem;
+            }
+
+            .dashboard-container.grid-2x3,
+            .dashboard-container.grid-3x3,
+            .dashboard-container.grid-4x3 {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .graph-container {
+                padding: 1.2rem;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .view-dashboard {
+                padding: 4rem 5%;
+            }
+
+            .dashboard-header h2 {
+                font-size: 2rem;
+            }
+
+            .dashboard-container {
+                padding: 1rem;
+                grid-template-columns: 1fr;
+            }
+
+            .dashboard-container.grid-1x2,
+            .dashboard-container.grid-2x2,
+            .dashboard-container.grid-2x3,
+            .dashboard-container.grid-3x3,
+            .dashboard-container.grid-4x3 {
+                grid-template-columns: 1fr;
+                grid-template-rows: auto;
+            }
+
+            .graph-container h3 {
+                font-size: 1.2rem;
+            }
+
+            .plot {
+                min-height: 250px;
+            }
+
+            .dashboard-actions .btn {
+                padding: 0.7rem 1.2rem;
+                font-size: 0.95rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .dashboard-header h2 {
+                font-size: 1.8rem;
+            }
+
+            .dashboard-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .dashboard-actions {
+                width: 100%;
+                justify-content: center;
+            }
+
+            .graph-container {
+                padding: 1rem;
+            }
+
+            .number-value {
+                font-size: 2rem;
+            }
+
+            .number-label {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1 style="font-size: 30px;">Dashboard Generator</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('dashboard') }}">My Dashboards</a></li>
+                    <li><a href="{{ url_for('create_dashboard') }}">Create New</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout ({{ session.username }})</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="view-dashboard">
+            <div class="dashboard-header">
+                <h2>{{ dashboard_name }}</h2>
+                <div class="dashboard-actions">
+                    <button id="export-png" class="btn secondary">Export as PNG</button>
+                    <button id="export-pdf" class="btn secondary">Export as PDF</button>
+                </div>
+            </div>
+            
+            <div id="dashboard-container" class="dashboard-container theme-{{ dashboard_config.theme }}">
+                <div id="loading" class="loading">
+                    <div class="spinner"></div>
+                    <p>Loading dashboard data...</p>
+                </div>
+                <!-- Graphs will be rendered here -->
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 Dashboard Generator. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/script.js') }}"></script>
+    <script>
+        // Dashboard configuration from server
+        const dashboardConfig = {{ dashboard_config|tojson|safe }};
+        const dashboardId = {{ dashboard_id }};
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            
+            document.getElementById('export-png').addEventListener('click', exportAsPNG);
+            document.getElementById('export-pdf').addEventListener('click', exportAsPDF);
+        });
+        
+        function loadDashboardData() {
+            fetch(`/get_dashboard_data/${dashboardId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        showError(data.error);
+                        return;
+                    }
+                    renderDashboard(data.graphs);
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    showError('An error occurred while loading dashboard data.');
+                });
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('dashboard-container');
+            container.innerHTML = `<div class="error-message">${message}</div>`;
+        }
+        
+        function renderDashboard(graphs) {
+            const container = document.getElementById('dashboard-container');
+            document.getElementById('loading').remove();
+            container.className = `dashboard-container theme-${dashboardConfig.theme} grid-${getGridLayout(graphs.length)}`;
+            
+            graphs.forEach((graph, index) => {
+                const graphDiv = document.createElement('div');
+                graphDiv.className = 'graph-container';
+                
+                const graphTitle = document.createElement('h3');
+                graphTitle.textContent = graph.name;
+                graphDiv.appendChild(graphTitle);
+                
+                const plotDiv = document.createElement('div');
+                plotDiv.id = `plot-${index}`;
+                plotDiv.className = 'plot';
+                graphDiv.appendChild(plotDiv);
+                
+                container.appendChild(graphDiv);
+                
+                renderGraph(graph, index);
+            });
+        }
+        
+        function getGridLayout(numGraphs) {
+            if (numGraphs <= 1) return '1x1';
+            if (numGraphs <= 2) return '1x2';
+            if (numGraphs <= 4) return '2x2';
+            if (numGraphs <= 6) return '2x3';
+            if (numGraphs <= 9) return '3x3';
+            return '4x3';
+        }
+        
+        function renderGraph(graph, index) {
+            const plotDiv = document.getElementById(`plot-${index}`);
+            
+            if (graph.type === 'number') {
+                plotDiv.className = 'plot number-card';
+                const valueDiv = document.createElement('div');
+                valueDiv.className = 'number-value';
+                valueDiv.style.color = graph.color;
+                valueDiv.textContent = graph.value !== undefined ? new Intl.NumberFormat().format(graph.value) : 'N/A';
+                
+                const labelDiv = document.createElement('div');
+                labelDiv.className = 'number-label';
+                labelDiv.textContent = graph.name;
+                
+                plotDiv.appendChild(valueDiv);
+                plotDiv.appendChild(labelDiv);
+                return;
+            }
+            
+            if (graph.empty) {
+                plotDiv.innerHTML = '<p>No data available after filtering.</p>';
+                return;
+            }
+            
+            let data = [];
+            let layout = {
+                margin: { t: 30, r: 30, l: 50, b: 50 },
+                height: 300
+            };
+            
+            const xData = graph.x || [];
+            const yData = graph.y || [];
+            
+            switch (graph.type) {
+                case 'bar':
+                case 'clustered-bar':
+                    data = [{
+                        x: xData,
+                        y: yData,
+                        type: 'bar',
+                        marker: { color: graph.color }
+                    }];
+                    if (graph.type === 'clustered-bar') layout.barmode = 'group';
+                    break;
+                    
+                case 'joint-bar':
+                    data = [{
+                        x: xData,
+                        y: yData,
+                        type: 'bar',
+                        marker: { color: graph.color }
+                    }];
+                    layout.barmode = 'stack';
+                    break;
+                    
+                case 'line':
+                    data = [{
+                        x: xData,
+                        y: yData,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        marker: { color: graph.color }
+                    }];
+                    break;
+                    
+                case 'scatter':
+                    data = [{
+                        x: xData,
+                        y: yData,
+                        type: 'scatter',
+                        mode: 'markers',
+                        marker: { color: graph.color }
+                    }];
+                    break;
+                    
+                case 'pie':
+                    data = [{
+                        values: graph.values || [],
+                        labels: graph.labels || [],
+                        type: 'pie',
+                        marker: { colors: generatePieColors(graph.color, graph.labels.length) }
+                    }];
+                    layout.height = 350;
+                    break;
+                    
+                case 'donut':
+                    data = [{
+                        values: graph.values || [],
+                        labels: graph.labels || [],
+                        type: 'pie',
+                        hole: 0.4,
+                        marker: { colors: generatePieColors(graph.color, graph.labels.length) }
+                    }];
+                    layout.height = 350;
+                    break;
+                    
+                case 'histogram':
+                    data = [{
+                        x: xData,
+                        type: 'histogram',
+                        marker: { color: graph.color }
+                    }];
+                    break;
+                    
+                case 'gauge':
+                    const gaugeValue = graph.value || 0;
+                    data = [{
+                        type: 'indicator',
+                        mode: 'gauge+number',
+                        value: gaugeValue,
+                        title: { text: graph.name },
+                        gauge: {
+                            axis: { range: [null, Math.max(100, gaugeValue * 1.2)] },
+                            bar: { color: graph.color },
+                            steps: [
+                                { range: [0, gaugeValue * 0.5], color: lightenColor(graph.color, 60) },
+                                { range: [gaugeValue * 0.5, gaugeValue * 1.2], color: lightenColor(graph.color, 30) }
+                            ]
+                        }
+                    }];
+                    layout.height = 250;
+                    break;
+                    
+                case 'distribution':
+                    data = [{
+                        x: xData,
+                        type: 'box',
+                        marker: { color: graph.color }
+                    }];
+                    break;
+                    
+                default:
+                    data = [{
+                        x: xData,
+                        y: yData,
+                        type: 'scatter',
+                        mode: 'lines+markers',
+                        marker: { color: graph.color }
+                    }];
+            }
+            
+            try {
+                Plotly.newPlot(plotDiv, data, layout);
+            } catch (error) {
+                console.error(`Error rendering graph ${graph.name}:`, error);
+                plotDiv.innerHTML = `<p>Error rendering graph: ${error.message}</p>`;
+            }
+        }
+        
+        function generatePieColors(baseColor, count) {
+            const colors = [];
+            const baseColors = [
+                '#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF',
+                '#FF9F40', '#C9CBCF', '#E7E9ED', '#7CB5EC', '#F7A35C'
+            ];
+            for (let i = 0; i < count; i++) {
+                if (i < baseColors.length) {
+                    colors.push(baseColors[i]);
+                } else {
+                    colors.push(lightenColor(baseColor, (i - baseColors.length) * 20));
+                }
+            }
+            return colors;
+        }
+        
+        function lightenColor(color, percent) {
+            const num = parseInt(color.replace('#', ''), 16);
+            const amt = Math.round(2.55 * percent);
+            const R = (num >> 16) + amt;
+            const G = (num >> 8 & 0x00FF) + amt;
+            const B = (num & 0x0000FF) + amt;
+            
+            return '#' + (
+                0x1000000 +
+                (R < 255 ? (R < 1 ? 0 : R) : 255) * 0x10000 +
+                (G < 255 ? (G < 1 ? 0 : G) : 255) * 0x100 +
+                (B < 255 ? (B < 1 ? 0 : B) : 255)
+            ).toString(16).slice(1);
+        }
+        
+        function exportAsPNG() {
+            const dashboardContainer = document.getElementById('dashboard-container');
+            html2canvas(dashboardContainer).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${dashboardConfig.dashboard_name}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+            });
+        }
+        
+        function exportAsPDF() {
+            const { jsPDF } = window.jspdf;
+            const dashboardContainer = document.getElementById('dashboard-container');
+            
+            html2canvas(dashboardContainer).then(canvas => {
+                const imgData = canvas.toDataURL('image/png');
+                const pdf = new jsPDF('l', 'mm', 'a4');
+                const imgProps = pdf.getImageProperties(imgData);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (imgProps.height * pdfWidth) / imgProps.width;
+                
+                pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
+                pdf.save(`${dashboardConfig.dashboard_name}.pdf`);
+            });
+        }
+    </script>
+</body>
+</html>

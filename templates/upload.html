@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Upload Data - Dashboard Generator</title>
+    <link rel="stylesheet" href="/static/css/styles.css">
+    <style>
+        /* Upload Section Styles */
+        :root {
+            --primary-color: #d4af37; /* Rich gold accent */
+            --primary-dark: #b8972e;
+            --text-color: #1a1a1a; /* Deep charcoal */
+            --text-light: #4a4a4a; /* Soft charcoal */
+            --bg-color: #f5ece4; /* Rich ivory */
+            --card-bg: rgba(255, 255, 255, 0.9);
+            --border-color: rgba(224, 224, 224, 0.5);
+            --shadow: 0 15px 60px rgba(0, 0, 0, 0.1);
+            --radius: 15px;
+            --transition: all 0.6s ease-in-out;
+            --glass-bg: rgba(245, 236, 228, 0.95);
+            --glass-border: rgba(224, 224, 224, 0.3);
+        }
+
+        .upload-container {
+            padding: 6rem 5%;
+            background: var(--bg-color);
+            position: relative;
+            overflow: hidden;
+            min-height: calc(100vh - 200px);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .upload-container h2 {
+            text-align: center;
+            margin-bottom: 2rem;
+            color: var(--text-color);
+            text-transform: uppercase;
+            font-family: 'Playfair Display', serif;
+            font-size: 2.5rem;
+            position: relative;
+        }
+
+        .upload-container h2::after {
+            content: '';
+            position: absolute;
+            bottom: -0.8rem;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60px;
+            height: 3px;
+            background: var(--primary-color);
+            border-radius: 2px;
+        }
+
+        .alert {
+            max-width: 600px;
+            margin: 0 auto 1.5rem;
+            padding: 1rem;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            font-size: 1rem;
+            text-align: center;
+            font-family: 'Lora', serif;
+            transition: var(--transition);
+        }
+
+        .alert.success {
+            color: #2e7d32;
+            background: rgba(200, 230, 201, 0.95);
+        }
+
+        .alert.error {
+            color: #d32f2f;
+            background: rgba(239, 195, 195, 0.95);
+        }
+
+        .alert:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+        }
+
+        .upload-box {
+            max-width: 500px;
+            width: 100%;
+            background: var(--glass-bg);
+            backdrop-filter: blur(15px);
+            border: 1px solid var(--glass-border);
+            border-radius: var(--radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+            text-align: center;
+        }
+
+        .upload-box:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 70px rgba(212, 175, 55, 0.2);
+        }
+
+        .file-upload {
+            border: 2px dashed var(--border-color);
+            border-radius: var(--radius);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .file-upload:hover {
+            border-color: var(--primary-color);
+            background: rgba(212, 175, 55, 0.05);
+        }
+
+        .file-upload.highlight {
+            border-color: var(--primary-color);
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .file-upload label {
+            display: block;
+            cursor: pointer;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .file-upload p {
+            font-size: 1.1rem;
+            color: var(--text-light);
+            font-family: 'Lora', serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .file-types {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            opacity: 0.8;
+        }
+
+        .file-upload input[type="file"] {
+            display: none;
+        }
+
+        .file-name {
+            font-size: 1rem;
+            color: var(--text-color);
+            font-family: 'Lora', serif;
+            margin-bottom: 1.5rem;
+            min-height: 1.5rem;
+        }
+
+        .upload-box .btn {
+            padding: 0.9rem 2.5rem;
+            font-size: 1.1rem;
+            border-radius: 10px;
+            font-family: 'Lora', serif;
+            font-weight: 500;
+            transition: var(--transition);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .btn.primary {
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+            color: var(--card-bg);
+        }
+
+        .btn.primary:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.3);
+            background: linear-gradient(45deg, var(--primary-dark), var(--primary-color));
+        }
+
+        /* Responsive Styles for Upload */
+        @media (max-width: 768px) {
+            .upload-container {
+                padding: 4rem 5%;
+            }
+
+            .upload-container h2 {
+                font-size: 2rem;
+            }
+
+            .upload-box {
+                padding: 1.5rem;
+            }
+
+            .file-upload {
+                padding: 1.5rem;
+            }
+
+            .upload-box .btn {
+                padding: 0.8rem 2rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .upload-container h2 {
+                font-size: 1.8rem;
+            }
+
+            .upload-box {
+                padding: 1.2rem;
+            }
+
+            .file-upload p {
+                font-size: 1rem;
+            }
+
+            .file-types {
+                font-size: 0.85rem;
+            }
+
+            .file-name {
+                font-size: 0.9rem;
+            }
+
+            .upload-box .btn {
+                padding: 0.7rem 1.5rem;
+                font-size: 0.95rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <h1 style="font-size: 30px;">Dashboard Generator</h1>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="{{ url_for('dashboard') }}">My Dashboards</a></li>
+                    <li><a href="{{ url_for('create_dashboard') }}" class="active">Create New</a></li>
+                    <li><a href="{{ url_for('logout') }}">Logout ({{ session.username }})</a></li>
+                </ul>
+            </nav>
+        </header>
+
+        <main class="upload-container">
+            <h2>Upload Your Data File</h2>
+            
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            <div class="upload-box">
+                <form action="{{ url_for('create_dashboard') }}" method="post" enctype="multipart/form-data">
+                    <div class="file-upload">
+                        <label for="file">
+                            <div class="upload-icon">📁</div>
+                            <p>Drag and drop your file here or click to browse</p>
+                            <p class="file-types">Supported formats: .xlsx, .xls, .csv</p>
+                        </label>
+                        <input type="file" id="file" name="file" accept=".xlsx,.xls,.csv" required>
+                    </div>
+                    <div id="file-name" class="file-name"></div>
+                    <button type="submit" class="btn primary">Upload & Continue</button>
+                </form>
+            </div>
+        </main>
+
+        <footer>
+            <p>© 2025 Dashboard Generator. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script src="/static/js/script.js"></script>
+    <script>
+        // Display selected filename
+        document.getElementById('file').addEventListener('change', function() {
+            const fileName = this.files[0] ? this.files[0].name : '';
+            document.getElementById('file-name').textContent = fileName;
+        });
+        
+        // Drag and drop functionality
+        const dropArea = document.querySelector('.file-upload');
+        
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, preventDefaults, false);
+        });
+        
+        function preventDefaults(e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        ['dragenter', 'dragover'].forEach(eventName => {
+            dropArea.addEventListener(eventName, highlight, false);
+        });
+        
+        ['dragleave', 'drop'].forEach(eventName => {
+            dropArea.addEventListener(eventName, unhighlight, false);
+        });
+        
+        function highlight() {
+            dropArea.classList.add('highlight');
+        }
+        
+        function unhighlight() {
+            dropArea.classList.remove('highlight');
+        }
+        
+        dropArea.addEventListener('drop', handleDrop, false);
+        
+        function handleDrop(e) {
+            const dt = e.dataTransfer;
+            const files = dt.files;
+            document.getElementById('file').files = files;
+            
+            const fileName = files[0] ? files[0].name : '';
+            document.getElementById('file-name').textContent = fileName;
+        }
+    </script>
+</body>
+</html>
